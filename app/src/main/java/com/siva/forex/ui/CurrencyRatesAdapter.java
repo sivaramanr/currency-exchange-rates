@@ -1,8 +1,10 @@
 package com.siva.forex.ui;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,6 +37,7 @@ public class CurrencyRatesAdapter extends RecyclerView.Adapter<CurrencyRatesAdap
             Rate rate = rateList.get(position);
             holder.currencyPair.setText(rate.pair);
             holder.conversionRate.setText(Double.toString(rate.rate));
+            holder.rowLayout.setBackgroundColor(position%2==0?Color.parseColor("#f2f2f2"):Color.WHITE);
         }
     }
 
@@ -45,12 +48,15 @@ public class CurrencyRatesAdapter extends RecyclerView.Adapter<CurrencyRatesAdap
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        final LinearLayout rowLayout;
+
         final TextView currencyPair;
 
         final TextView conversionRate;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            rowLayout = itemView.findViewById(R.id.rowLayout);
             currencyPair = itemView.findViewById(R.id.currencyPair);
             conversionRate = itemView.findViewById(R.id.conversionRate);
         }

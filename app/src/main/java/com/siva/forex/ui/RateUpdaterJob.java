@@ -6,13 +6,18 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
+import com.siva.forex.Constants;
 import com.siva.forex.db.AppDatabase;
 import com.siva.forex.db.Rate;
 import com.siva.forex.net.APIService;
-import com.siva.forex.net.EURGBP;
-import com.siva.forex.net.ExchangeRates;
-import com.siva.forex.net.USDEUR;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,6 +25,8 @@ import javax.inject.Inject;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 import timber.log.Timber;
 
 public class RateUpdaterJob implements LifecycleObserver {
@@ -51,24 +58,33 @@ public class RateUpdaterJob implements LifecycleObserver {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        apiService.getRates("EURGBP,USDEUR").subscribe(new Observer<ExchangeRates>() {
+                        apiService.getRates(Constants.CURRENCY_PAIRS)
+                                .subscribeOn(Schedulers.io()).subscribe(new Observer<ResponseBody>() {
                             @Override
                             public void onSubscribe(Disposable d) {}
 
                             @Override
-                            public void onNext(ExchangeRates exchangeRates) {
-                                ExchangeRates.Rates rates = exchangeRates.getRates();
-                                EURGBP eurgbp = rates.getEURGBP();
-                                Rate rate1 = new Rate();
-                                rate1.pair = "EURGBP";
-                                rate1.rate = eurgbp.getRate();
-                                rate1.timestamp = eurgbp.getTimestamp();
-                                USDEUR usdeur = rates.getUSDEUR();
-                                Rate rate2 = new Rate();
-                                rate2.pair = "USDEUR";
-                                rate2.rate = usdeur.getRate();
-                                rate2.timestamp = usdeur.getTimestamp();
-                                appDatabase.getRateDAO().store(rate1, rate2);
+                            public void onNext(ResponseBody responseBody) {
+                                Timber.d(responseBody.toString());
+                                try {
+                                    JSONObject response = new JSONObject(responseBody.string());
+                                    JSONObject rates = response.getJSONObject("rates");
+                                    Iterator<String> keys = rates.keys();
+                                    List<Rate> rateList = new ArrayList<>();
+                                    while(keys.hasNext()){
+                                        String key = keys.next();
+                                        JSONObject crncy = rates.getJSONObject(key);
+                                        Rate rate = new Rate();
+                                        rate.pair = key;
+                                        rate.rate = crncy.getDouble("rate");
+                                        rateList.add(rate);
+                                    }
+                                    appDatabase.getRateDAO().store(rateList.toArray(new Rate[0]));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
 
                             @Override

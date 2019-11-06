@@ -15,8 +15,4 @@ public class Rate {
 
     public double rate;
 
-    public int state;
-
-    public long timestamp;
-
 }
