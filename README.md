@@ -11,4 +11,4 @@ Sample App developed based on MVVM architecture using Dagger, RxJava, Room, Retr
 https://www.freeforexapi.com
 
 #### Screenshot
-![alt Currency Exchange Rates](https://sivaramanr.000webhostapp.com/currency_exchange_ra_1xVxp.jpg)
+![alt Currency Exchange Rates](https://sivaramanr.000webhostapp.com/currency_exchange_rates.jpg)
