@@ -23,6 +23,14 @@ public class CurrencyRatesAdapter extends RecyclerView.Adapter<CurrencyRatesAdap
         this.rateList = rateList;
     }
 
+    public List<Rate> getRateList() {
+        return rateList;
+    }
+
+    public void setRateList(List<Rate> rateList) {
+        this.rateList = rateList;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

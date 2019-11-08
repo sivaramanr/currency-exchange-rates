@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,11 +29,13 @@ public class MainActivity extends DaggerAppCompatActivity{
 
     private RatesViewModel viewModel;
 
+    private List<Rate> rateList;
+
     private CurrencyRatesAdapter adapter;
 
     private RecyclerView recyclerView;
 
-    private List<Rate> rateList;
+    private RatesDiffCallback ratesDiffCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +43,21 @@ public class MainActivity extends DaggerAppCompatActivity{
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         setContentView(R.layout.activity_main);
-        viewModel = viewmodelFactory.create(RatesViewModel.class);
         rateList = new ArrayList<>();
+        viewModel = viewmodelFactory.create(RatesViewModel.class);
         viewModel.getRateList().observe(this, new Observer<List<Rate>>() {
             @Override
-            public void onChanged(List<Rate> rates) {
-                Timber.d("Exchange rates updated");
-                rateList.clear();
-                rateList.addAll(rates);
-                adapter.notifyDataSetChanged();
+            public void onChanged(List<Rate> newRates) {
+                Timber.d("Exchange Rates updated");
+                if (rateList.size()==0){
+                    rateList.addAll(newRates);
+                    adapter.notifyDataSetChanged();
+                }else{
+                    ratesDiffCallback = new RatesDiffCallback(adapter.getRateList(), newRates);
+                    DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(ratesDiffCallback);
+                    adapter.setRateList(newRates);
+                    diffResult.dispatchUpdatesTo(adapter);
+                }
             }
         });
         adapter = new CurrencyRatesAdapter(rateList);
