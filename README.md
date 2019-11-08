@@ -1,5 +1,5 @@
 # Currency Exchange Rates
-Sample App developed based on MVVM architecture using Dagger, RxJava, Room, Retrofit, RecyclerView, LifecycleObserver and LiveData.
+Sample App developed based on MVVM architecture using Dagger, RxJava, Room, Retrofit, RecyclerView, DiffUtil LifecycleObserver and LiveData.
 
 #### The app has following packages:
 1. **db**: It contains Database, DAO and Entity classes.
